@@ -21,13 +21,10 @@ var countries = new List<Country>
     }
 };
 
-
-
-
-foreach (var country in countries)
-{
-    QueryBuilder.CreateGraphQLQuery(country.Name, nodes, templateId, parentId);
-}
+//foreach (var country in countries)
+//{
+//    QueryBuilder.CreateGraphQLQuery(country.Name, nodes, templateId, parentId);
+//}
 
 Console.WriteLine(countries);
 
