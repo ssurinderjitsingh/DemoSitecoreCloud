@@ -124,5 +124,41 @@ namespace DemoSitecoreCloud
                 }
             };
         }
+
+        public static GraphQLRequest UpdateItemGraphQLQuery(string itemId, Dictionary<string, string> fields, string templateId, string parentId)
+        {
+            return new GraphQLRequest
+            {
+                Query = $@"
+                        mutation {{
+                            updateItem(
+                                    input:{{ 
+                                             itemId: ""{itemId}""
+                                             templateId: ""{templateId}""
+                                             fields: ""{{fields}}""
+                                         }}
+                                     ){{
+                                       item {{
+                                            itemId
+                                            name
+                                            path    
+                                            fields{{
+                                                 edges{{
+                                                  nodes {{ 
+                                                           name 
+                                                           value
+                                                       }}
+                                                   }}
+                                                }}
+                                            }}
+                                        }}
+                                 }}",
+                Variables = new
+                {
+                    itemId = itemId,
+                    fields = fields
+                }
+            };
+        }
     }
 }
