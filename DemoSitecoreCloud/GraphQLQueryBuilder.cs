@@ -5,6 +5,7 @@ using System.Net.NetworkInformation;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using DemoSitecoreCloud.Interface;
 using GraphQL;
 using GraphQL.Client.Http;
 using GraphQL.Client.Serializer.Newtonsoft;
@@ -15,16 +16,16 @@ namespace DemoSitecoreCloud
     /// <summary>
     /// Builds graph ql queries for sitecore operations
     /// </summary>
-    public class QueryBuilder
+    public class GraphQLQueryBuilder : IGraphQLQueryBuilder
     {
-        public QueryBuilder() { }
+        public GraphQLQueryBuilder() { }
 
         /// <summary>
         /// Query to retrieve item from sitecore based on Item Id
         /// </summary>
         /// <param name="itemId"></param>
         /// <returns></returns>
-        public static GraphQLRequest GetItemGraphQLQuery(string itemId)
+        public GraphQLRequest GetItemGraphQLQuery(string itemId)
         {
             var query = $@"
                         query {{
@@ -55,7 +56,7 @@ namespace DemoSitecoreCloud
         /// <param name="first"></param>
         /// <param name="afterCursor"></param>
         /// <returns></returns>
-        public static GraphQLRequest GetPaginatedGraphQLQuery(string itemId, int first, string afterCursor)
+        public GraphQLRequest GetPaginatedGraphQLQuery(string itemId, int first, string afterCursor)
         {
             afterCursor = string.IsNullOrEmpty(afterCursor) ? "null" : $"\"{afterCursor}\"";
             return new GraphQLRequest
@@ -107,7 +108,7 @@ namespace DemoSitecoreCloud
         /// <param name="templateId"></param>
         /// <param name="parentId"></param>
         /// <returns></returns>
-        public static GraphQLRequest CreateGraphQLQuery(string itemName, Dictionary<string, string> nodes, string templateId, string parentId)
+        public GraphQLRequest CreateGraphQLQuery(string itemName, Dictionary<string, string> nodes, string templateId, string parentId)
         {
 
             var fieldsBuilder = new StringBuilder();
@@ -156,7 +157,7 @@ namespace DemoSitecoreCloud
         /// <param name="templateId">template id of the node</param>
         /// <param name="parentId">Parent id of the item needs to be updated</param>
         /// <returns></returns>
-        public static GraphQLRequest UpdateItemGraphQLQuery(string itemId, Dictionary<string, string> fields, string templateId, string parentId)
+        public GraphQLRequest UpdateItemGraphQLQuery(string itemId, Dictionary<string, string> fields, string templateId, string parentId)
         {
             return new GraphQLRequest
             {
@@ -197,7 +198,7 @@ namespace DemoSitecoreCloud
         /// </summary>
         /// <param name="itemId"></param>
         /// <returns></returns>
-        public static GraphQLRequest DeleteItemGraphQLQuery(string itemId)
+        public GraphQLRequest DeleteItemGraphQLQuery(string itemId)
         {
             return new GraphQLRequest
             {
@@ -216,5 +217,23 @@ namespace DemoSitecoreCloud
             };
         }
 
+        /// <summary>
+        /// Retrieve secured presigned url to upload media to sitecore cloud
+        /// </summary>
+        /// <param name="itemPath"></param>
+        /// <returns></returns>
+        public GraphQLRequest GetMediaPresignedUrlGraphQLuery(string itemPath)
+        {
+            return new GraphQLRequest
+            {
+                Query = $@"
+                        mutation {{
+                            uploadMedia(input: {{ itemPath: ""{itemPath}"" }} ) {{
+                               presignedUploadUrl
+                            }}
+                        }}"
+            };
+
+        }
     }
 }

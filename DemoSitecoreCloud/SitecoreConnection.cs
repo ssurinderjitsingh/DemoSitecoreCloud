@@ -1,46 +1,35 @@
-﻿using Newtonsoft.Json;
+﻿using DemoSitecoreCloud.Interface;
+using DemoSitecoreCloud.Models;
+using Newtonsoft.Json;
 
 namespace DemoSitecoreCloud
 {
-    /// <summary>
-    /// Model for Sitecore token response.
-    /// </summary>
-    public class SitecoreToken
-    {
-        [JsonProperty("access_token")]
-        public string AccessToken { get; set; }
-
-        [JsonProperty("scope")]
-        public string Scope { get; set; }
-
-        [JsonProperty("expires_in")]
-        public string ExpiresIn { get; set; }
-
-        [JsonProperty("token_type")]
-        public string TokenType { get; set; }
-    }
 
     /// <summary>
     /// Handles authentication with Sitecore XM Cloud to retrieve an access token.
     /// </summary>
-    public class SitecoreXmConnection
+    public class SitecoreConnection : IConnection
     {
+        public string EndPoint { get; private set; }
+
+        private readonly string _clientId, _clientSecret, _tokenUrl, _audience;
+
         private readonly HttpClient _httpClient;
-        private const string BaseUrl = "https://hostname-sitecorecloud.io";
-        private const string TokenEndpoint = "/api/authoring/graphql/v1/oauth/token";
+        private string TokenEndPoint {  get; set; }
 
-        private readonly string _clientId = "543k3jl534oi5lk3j54";
-        private readonly string _clientSecret = "89dsfgfdg9gfdsfdgs0fd897bgsdfgslkrw8e7r9er8we7";
-        private readonly string _audience = "http://api/.sitecorcloud.io";
-
-        public SitecoreXmConnection(HttpClient httpClient)
+        public SitecoreConnection(string endpoint, string clientId, string clientSecret, string tokenUrl, string audience)
         {
-            _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
+            EndPoint = endpoint;
+            _clientId = clientId;
+            _clientSecret = clientSecret;
+            _tokenUrl = tokenUrl;
+            _audience = audience;
+            _httpClient = new HttpClient();
         }
 
-        public async Task<string> GetAuthTokenAsync()
+        public async Task<string> GetAccessTokenAsync()
         {
-            var requestUrl = $"{BaseUrl}{TokenEndpoint}";
+            var requestUrl = $"{EndPoint}{TokenEndPoint}";
             var formData = new Dictionary<string, string>
             {
                 ["grant_type"] = "client_credentials",
@@ -57,7 +46,6 @@ namespace DemoSitecoreCloud
                 };
 
                 var response = await _httpClient.SendAsync(request);
-
                 if (!response.IsSuccessStatusCode)
                 {
                     Console.Error.WriteLine($"Failed to retrieve token. Status: {response.StatusCode}");

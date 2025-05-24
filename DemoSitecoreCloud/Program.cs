@@ -1,36 +1,94 @@
-﻿// See https://aka.ms/new-console-template for more information
-using DemoSitecoreCloud;
+﻿using DemoSitecoreCloud;
+using DemoSitecoreCloud.Interface;
 using DemoSitecoreCloud.Models;
-using System.Net.Http.Headers;
+using GraphQL.Types.Relay.DataObjects;
+using System.Collections.Generic;
 
-Console.WriteLine("Hello, World!");
-
-var countries = new List<Country>
+public class Program
 {
-    new Country
+    private static IConnection connection;
+    public static async Task Main(string[] args)
     {
-        DisplayName = "Canada",
-        Name = "Canada",
-        CountryCode = "CA"
-    },
-    new Country
-    {
-        DisplayName = "United Kingdom",
-        Name = "United Kingdom",
-        CountryCode = "UK"
+        connection = new SitecoreConnection(
+            endpoint: "https://hostname-sitecorecloud.io",
+            clientId: "client-id",
+            clientSecret: "client-secret",
+            tokenUrl: "https://identity-url/connect/token",
+            audience: "https://your-audience"
+        );
+
+        var builder = new GraphQLQueryBuilder();
+        var executor = new GraphQLExecutor(connection);
+        var uploader = new MediaUploader(builder, executor);
+
+        var countries = new List<Country>
+            {
+                new Country { DisplayName = "Canada", Name = "Canada", CountryCode = "CA" },
+                new Country { DisplayName = "United Kingdom", Name = "United Kingdom", CountryCode = "UK" }
+            };
+
+        Console.WriteLine("Countries loaded:");
+        foreach (var country in countries)
+        {
+            Console.WriteLine($"{country.DisplayName} ({country.CountryCode})");
+        }
+
+        // Example Upload usage
+       // string result = await uploader.UploadAsync("/Project/Media/Banner", "C:\\temp\\banner.jpg");
+        //Console.WriteLine(result);
     }
-};
 
-//foreach (var country in countries)
-//{
-//    QueryBuilder.CreateGraphQLQuery(country.Name, nodes, templateId, parentId);
-//}
+    public async Task<string> CreateSitecoreItem(string sitecoreId)
+    {
+        var builder = new GraphQLQueryBuilder();
+        var executor = new GraphQLExecutor(connection);
 
-Console.WriteLine(countries);
+        var fields = new Dictionary<string, string>();
+        var itemName = string.Empty;
+        var templateId = "template-guid";
+        var parentId = "parent-guid";
 
-//var countries = new List<Country>().Add(new Country
-//{
-//    DisplayName = "Canada",
-//    Name = "Canada",
-//    CountryCode = "CA"
-//});
+        var graphQlQuery = builder.CreateGraphQLQuery(itemName, fields, templateId, parentId);
+        var result = await executor.ExecuteMutationQuery(graphQlQuery);
+
+        return result;
+    }
+
+    public async Task<string> UpdateSitecoreItem(string sitecoreId)
+    {
+        var builder = new GraphQLQueryBuilder();
+        var executor = new GraphQLExecutor(connection);
+
+        var fields = new Dictionary<string, string>();
+        var itemName = string.Empty;
+        var templateId = "template-guid";
+        var parentId = "parent-guid";
+
+        var graphQlQuery = builder.UpdateItemGraphQLQuery(itemName, fields, templateId, parentId);
+        var result = await executor.ExecuteMutationQuery(graphQlQuery);
+
+        return result;
+    }
+
+    public async Task<List<SitecoreNode>> GetPaginatedItemsAsync(string parentId)
+    {
+        var builder = new GraphQLQueryBuilder();
+        var executor = new GraphQLExecutor(connection);
+
+        var nodes = new List<SitecoreNode>();
+        var first = 100;
+        string? afterCursor = null;
+        var pageInfo = new PageInfo();
+
+        do
+        {
+            var graphQlQuery = builder.GetPaginatedGraphQLQuery(parentId, first, afterCursor);
+            var result = await executor.ExecuteQueryAsync(graphQlQuery);
+
+        }
+        while (pageInfo?.HasNextPage == true); // continue if there are more pages
+        return nodes;
+    }
+}
+
+
