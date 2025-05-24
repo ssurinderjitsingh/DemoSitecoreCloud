@@ -81,5 +81,48 @@ namespace DemoSitecoreCloud
             };
         }
 
+        public static GraphQLRequest GetPaginatedGraphQLQuery(string itemId, int first, string afterCursor)
+        {
+            afterCursor = string.IsNullOrEmpty(afterCursor) ? "null" : $"\"{afterCursor}\"";
+            return new GraphQLRequest
+            {
+                Query = $@"
+                        query {{
+                            item(where: {{ itemId: ""{itemId}"" }}) {{
+                                        children(first: {{first}}, after:{afterCursor}) {{
+                                            edges {{ 
+                                                   node{{
+                                                           name 
+                                                           itemId
+                                                           itemUri
+                                                           path
+                                                           displayName
+                                                           parent{{
+                                                               itemId
+                                                          }}
+                                                          fields(ownFields:true, excludeStandardfields: true){{
+                                                            edges{{
+                                                              nodes {{ 
+                                                                     name 
+                                                                     value
+                                                                   }}
+                                                               }}
+                                                           }}
+                                                      }}
+                                                 }}
+                                                pageInfo {{
+                                                     endCursor
+                                                     hasNextPage
+                                              }}
+                                          }}
+                                      }}
+                                 }}",
+                Variables = new
+                {
+                    first = first,
+                    afterCursor = string.IsNullOrEmpty(afterCursor) ? null : afterCursor
+                }
+            };
+        }
     }
 }
