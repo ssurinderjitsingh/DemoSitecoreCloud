@@ -90,15 +90,27 @@ public class Program
         var nodes = new List<SitecoreNode>();
         var first = 100;
         string? afterCursor = null;
-        var pageInfo = new PageInfo();
+        bool hasNextPage = false;
 
         do
         {
             var graphQlQuery = builder.GetPaginatedGraphQLQuery(parentId, first, afterCursor);
             var result = await executor.ExecuteQueryAsync(graphQlQuery);
 
-        }
-        while (pageInfo?.HasNextPage == true); // continue if there are more pages
+            if (result != null)
+            {
+                nodes.AddRange(result.Nodes);
+
+                hasNextPage = result.PageInfo?.HasNextPage ?? false;
+                afterCursor = result.PageInfo?.EndCursor;
+            }
+            else
+            {
+                hasNextPage = false; // stop on failure
+            }
+
+        } while (hasNextPage);
+
         return nodes;
     }
 }
