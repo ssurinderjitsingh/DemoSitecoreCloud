@@ -70,6 +70,18 @@ public class Program
         return result;
     }
 
+    public async Task<Root> GetItemsAsync(string itemId)
+    {
+        var builder = new GraphQLQueryBuilder();
+        var executor = new GraphQLExecutor(connection);
+
+        var graphQlQuery = builder.GetItemGraphQLQuery(itemId);
+        var result = await executor.ExecuteQueryAsync(graphQlQuery);
+
+        return result;
+
+    }
+
     public async Task<List<SitecoreNode>> GetPaginatedItemsAsync(string parentId)
     {
         var builder = new GraphQLQueryBuilder();

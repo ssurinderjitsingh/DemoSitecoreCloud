@@ -5,10 +5,11 @@ namespace DemoSitecoreCloud.Interface
 {
     public interface IGraphQLExecutor
     {
-        Task<string> ExecuteCreateQuery(GraphQLRequest graphQLQuery);
+        Task<Root> ExecuteQueryAsync(GraphQLRequest graphQLQuery);
 
         Task<string> ExecuteMediaGraphQLQuery(GraphQLRequest graphQLQuery);
 
-        Task<Root> ExecuteMutationQuery(GraphQLRequest graphQLQuery);
+        Task<string> ExecuteMutationQuery(GraphQLRequest graphQLQuery);
     }
 }
+    
