@@ -28,21 +28,19 @@ namespace DemoSitecoreCloud
         /// </summary>
         /// <param name="graphQLQuery"></param>
         /// <returns></returns>
-        public async Task<string> ExecuteMutationQuery(GraphQLRequest graphQLQuery)
+        public async Task<string> ExecuteMutationQuery(GraphQLRequest graphQLQuery, bool isCreate)
         {
             var token = await _connection.GetAccessTokenAsync();
             _graphQLClient.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-            var dynamicObject = await _graphQLClient.SendMutationAsync<dynamic>(graphQLQuery);
-            if (dynamicObject.Data != null)
-            {
-                var data = dynamicObject.Data;
-                if (data != null)
-                {
-                    var createItem = data.createItem;
-                }
-            }
-            return "Item Created";
+            var response = await _graphQLClient.SendMutationAsync<dynamic>(graphQLQuery);
+            var data = response.Data;
+
+            if (data == null)
+                return string.Empty;
+
+            var mutationResult = isCreate ? data.createItem : data.updateItem;
+            return mutationResult?.name ?? string.Empty;
         }
 
         /// <summary>
