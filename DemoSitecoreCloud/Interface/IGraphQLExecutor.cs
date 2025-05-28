@@ -9,7 +9,8 @@ namespace DemoSitecoreCloud.Interface
 
         Task<string> ExecuteMediaGraphQLQuery(GraphQLRequest graphQLQuery);
 
-        Task<string> ExecuteMutationQuery(GraphQLRequest graphQLQuery);
+        Task<string> ExecuteMutationQuery(GraphQLRequest graphQLQuery, bool isCreate);
+            
     }
 }
     

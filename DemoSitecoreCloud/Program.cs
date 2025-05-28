@@ -49,7 +49,7 @@ public class Program
         var parentId = "parent-guid";
 
         var graphQlQuery = builder.CreateGraphQLQuery(itemName, fields, templateId, parentId);
-        var result = await executor.ExecuteMutationQuery(graphQlQuery);
+        var result = await executor.ExecuteMutationQuery(graphQlQuery, true);
 
         return result;
     }
@@ -65,7 +65,7 @@ public class Program
         var parentId = "parent-guid";
 
         var graphQlQuery = builder.UpdateItemGraphQLQuery(itemName, fields, templateId, parentId);
-        var result = await executor.ExecuteMutationQuery(graphQlQuery);
+        var result = await executor.ExecuteMutationQuery(graphQlQuery, false);
 
         return result;
     }
